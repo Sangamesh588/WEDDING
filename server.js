@@ -97,6 +97,9 @@ app.get("/api/admin/wishes", adminAuth, async (req, res) => {
 /* ---------------- STATIC FRONTEND ---------------- */
 
 // 1. Serve static files
+/* ---------------- STATIC FRONTEND ---------------- */
+
+// 1. Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // 2. Exact admin routes
@@ -108,13 +111,15 @@ app.get("/dashboard.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-// 3. DO NOT TOUCH API — regex that keeps /api working
+// 3. Prevent API routes from being overridden
 app.get(/^\/api\/.*/, (req, res) => {
   res.status(404).json({ error: "Not found" });
 });
 
-// 4. Fallback for all OTHER routes (wedding site)
-app.get("*", (req, res) => {
+// 4. Catch-all for ALL OTHER routes (NO STAR!)
+app.get(/^(?!\/api)(?!\/admin)(?!\/dashboard).+$/, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+
 
