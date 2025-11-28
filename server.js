@@ -94,10 +94,12 @@ app.get("/api/admin/wishes", adminAuth, async (req, res) => {
 
 /* ---------------- STATIC FRONTEND ---------------- */
 
-// 1. Serve static files from public
+/* ---------------- STATIC FRONTEND ---------------- */
+
+// 1. Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// 2. Admin pages (EXACT)
+// 2. Exact admin routes
 app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
@@ -106,15 +108,13 @@ app.get("/dashboard.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-// 3. API protection — DO NOT return HTML for API paths
-app.all("/api/*", (req, res, next) => {
-  next(); 
+// 3. DO NOT TOUCH API — regex that keeps /api working
+app.get(/^\/api\/.*/, (req, res) => {
+  res.status(404).json({ error: "Not found" });
 });
 
-// 4. SAFE fallback — only for frontend routes, not API
+// 4. Fallback for all OTHER routes (wedding site)
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// START SERVER
-app.listen(PORT, () => console.log("Server running"));
