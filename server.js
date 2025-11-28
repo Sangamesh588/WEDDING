@@ -15,17 +15,8 @@ const Admin = require("./models/Admin");
 
 // APP
 const app = express();
-
-// CORRECT CORS
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
 app.use(express.json());
+app.use(cors());
 
 // MONGO
 mongoose
@@ -33,12 +24,9 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
-const PORT = process.env.PORT || 5000;
-
 /* ---------------- ADMIN LOGIN ---------------- */
 app.post("/api/admin/login", async (req, res) => {
   const { username, password } = req.body;
-
   const admin = await Admin.findOne({ username });
   if (!admin) return res.status(400).json({ error: "Invalid username" });
 
@@ -94,15 +82,10 @@ app.get("/api/admin/wishes", adminAuth, async (req, res) => {
 
 /* ---------------- STATIC FRONTEND ---------------- */
 
-/* ---------------- STATIC FRONTEND ---------------- */
-
-// 1. Serve static files
-/* ---------------- STATIC FRONTEND ---------------- */
-
-// 1. Serve static files
+// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// 2. Exact admin routes
+// Admin pages
 app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
@@ -111,22 +94,15 @@ app.get("/dashboard.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-// 3. Prevent API routes from being overridden
-app.get(/^\/api\/.*/, (req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
-
-// 4. Catch-all for ALL OTHER routes (NO STAR!)
-app.get(/^(?!\/api)(?!\/admin)(?!\/dashboard).+$/, (req, res) => {
+// Wedding site fallback
+app.get("*", (req, res, next) => {
+  if (req.originalUrl.startsWith("/api")) return next();
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+/* ---------------- START SERVER (Render FIX) ---------------- */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on PORT:", PORT);
 });
-
-
-
-
-
